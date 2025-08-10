@@ -14,10 +14,52 @@ data "aws_ami" "app_ami" {
   owners = ["979382823631"] # Bitnami
 }
 
+data "aws_vpc" "default" {
+  default = true
+}
+
+
 resource "aws_instance" "web" {
-  ami           = data.aws_ami.app_ami.id
-  instance_type = var.instance_type
+  ami                    = data.aws_ami.app_ami.id
+  instance_type          = var.instance_type
+  vpc_security_group_ids = aws_security_groups.web.id
   tags = {
     Name = "HelloWorld"
   }
+}
+
+resource "aws_security_groups" "web" {
+  name = "web"
+  tags = {
+    Terraform = "tre"
+  }
+  vpc_id      = data.aws_vpc.default.id
+  description = "Security group for web instances"
+}
+
+resource "aws_security_group_rule" "web_http_in" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_groups.web.id
+}
+
+resource "aws_security_group_rule" "web_https_in" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_groups.web.id
+}
+
+resource "aws_security_group_rule" "web_everything_out" {
+  type              = "egress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_groups.web.id
 }
