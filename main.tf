@@ -28,7 +28,7 @@ resource "aws_instance" "web" {
   }
 }
 
-resource "aws_security_groups" "web" {
+resource "aws_security_group" "web" {
   name = "web"
   tags = {
     Terraform = "tre"
